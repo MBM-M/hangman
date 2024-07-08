@@ -1,6 +1,8 @@
 require_relative 'hmword.rb'
+require 'yaml'
 
 class HmGame
+  attr_reader :word, :guesses_left, :guessed_letters, :correct_positions, :incorrect_letters
 
   def initialize
     @word = HmWord.new.chosen_word
@@ -15,12 +17,26 @@ class HmGame
   end
 
   def get_guess
-    puts "Guess a letter: "
+    puts "Guess a letter, 'save' to save the game, or 'load' to load a saved game: "
     guess = gets.chomp.downcase
-    if @word.include?(guess)
-      correct_guess(guess)
+
+    case guess
+    when 'save'
+      save_game
+      "Game saved."
+    when 'load'
+      load_game
+      "Game loaded."
     else
-      incorrect_guess(guess)
+      if guess.length == 1 && guess.match?(/[a-z]/)
+        if @word.include?(guess)
+          correct_guess(guess)
+        else
+          incorrect_guess(guess)
+        end
+      else
+        "Invalid input. Please enter a single letter, 'save', or 'load'."
+      end
     end
   end
 
@@ -65,6 +81,25 @@ class HmGame
       puts "Game over! You have lost... The word was #{@word}. Better luck next time!"
     end
   end
+
+  def save_game
+    yaml = YAML.dump(self)
+    File.open('saved_game.yml', 'w') { |file| file.write(yaml) }
+  end
+
+  def load_game
+    if File.exist?('saved_game.yml')
+      yaml_data = File.read('saved_game.yml')
+      # Simplified safe_load call to troubleshoot
+      loaded_game = YAML.safe_load(yaml_data)
+      copy_instance_variables_from(loaded_game)
+      puts "Game loaded."
+    else
+      puts "No saved game found."
+    end
+  end  
+
+  private
 end
 
 newgame = HmGame.new
