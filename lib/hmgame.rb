@@ -86,7 +86,7 @@ class HmGame
     yaml = YAML.dump(self)
     File.open('saved_game.yml', 'w') { |file| file.write(yaml) }
   end
-
+=begin
   def load_game
     if File.exist?('saved_game.yml')
       yaml_data = File.read('saved_game.yml')
@@ -100,9 +100,12 @@ class HmGame
   end  
 
   private
+=end
+  def load_game
+    YAML::load('saved_game.yml')
+  end
 end
 
 newgame = HmGame.new
-puts newgame.the_word
 puts newgame.get_guess
 puts newgame.play
